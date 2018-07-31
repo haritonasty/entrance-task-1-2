@@ -50,4 +50,6 @@ export default function initMap(ymaps, containerId) {
       obj => filters[obj.isActive ? 'active' : 'defective']
     );
   });
+
+  myMap.geoObjects.add(objectManager);
 }
