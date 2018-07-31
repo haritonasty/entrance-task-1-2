@@ -1,4 +1,4 @@
-import { loadList, loadDetails } from './api';
+import { loadDetails, loadList } from './api';
 import { getDetailsContentLayout } from './details';
 import { createFilterControl } from './filter';
 
@@ -21,7 +21,7 @@ export default function initMap(ymaps, containerId) {
 
   objectManager.clusters.events.add('add', function (e) {
     let cluster = objectManager.clusters.getById(e.get('objectId')),
-        objects = cluster.properties.geoObjects;
+      objects = cluster.properties.geoObjects;
     if (objects.find(el => el.isActive === false)) {
       objectManager.clusters.setClusterOptions(cluster.id, {
         preset: 'islands#redClusterIcons'
@@ -56,7 +56,7 @@ export default function initMap(ymaps, containerId) {
   const listBoxControl = createFilterControl(ymaps);
   myMap.controls.add(listBoxControl);
 
-  var filterMonitor = new ymaps.Monitor(listBoxControl.state);
+  const filterMonitor = new ymaps.Monitor(listBoxControl.state);
   filterMonitor.add('filters', filters => {
     objectManager.setFilter(
       obj => filters[obj.isActive ? 'active' : 'defective']
