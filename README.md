@@ -25,7 +25,7 @@
         #map {
           height: 100vh;
         }
-Так, теперь видно, но нет геометок. Из src/index.js  идем в вызываемый InitMap и ковыряемся. Видно, что логика для объектов есть, но логики для их добавления на карту - нет. Исправляем
+Так, теперь видно, но нет геометок. Из src/index.js  идем в вызываемый InitMap и ковыряемся. Видно, что логика для объектов есть, но логики для их добавления на карту - нет. Исправляем:
     
     3. Добавим перед последней закрывающей фигурной скобкой в "src/map.js" на 54 строку:
     myMap.geoObjects.add(objectManager); 
@@ -38,9 +38,51 @@
        Стало: coordinates: [obj.lat, obj.long]
 
 Ура! Дальше понимаем, что балун не раскрывается при нажатии на станцию.
+Точнее раскрывается, пустой, не в том же месте, где станция и вылетает страшная ошибка в консоли. По тексту ошибки, отладчиком и интуицией понимаем, что проблема в "src/details.js" в методах build и clear, в которых идет обращение к this внутри стрелочной функции. А-та-та. Исправляем на обычную:
 
-1. В "src/chart.js", line 1 - oшибка импорта Chart. Как решить: убрать фигурные скобки в импорте, т.к. в библиотеке Chart.js класс Chart экспортируется по умолчанию.
-1. 
+    5. В "src/details.js" переписываем 30 и 46 строки:
+       Было: build: () => { 
+       Cтало: build: function() {
+       Аналогично с clear
+
+Так. Теперь балуны в нужных местах и даже что-то показывают. Что-то не так с графиком. Идем править:
+    
+    6. В "src/chart.js" на строке 47 максимальное значение по оси ОХ = 0. Убираем это -_-
+       Было: yAxes: [{ ticks: { beginAtZero: true, max: 0 } }]
+       Стало: yAxes: [{ ticks: { beginAtZero: true} }]
+       
+       Заодно поправим импорт: уберем фигурные скобки в импорте, 
+       т.к. в библиотеке Chart.js класс Chart экспортируется по умолчанию.
+
+Теперь мы можем видеть красивый график нагрузки. Только, каждется в отображаемые данные закралась ошибочка: показатели отстают на час, хотя обновляются при новом часе. Давайте исправим:
+    
+    7. В "src/chart.js" на строке 11 добавим единицу.
+       Было:  x.setHours(x.getHours() - data.length + i);
+       Стало: x.setHours(x.getHours() - data.length + i + 1);
+       
+Теперь ок. Перекрасим кластер, если там есть неисправная станция. Готового кода нет, значит допишем сами:
+
+    8. В "src/map.js" заменим:
+    
+           objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
+       
+       на:
+       
+           objectManager.clusters.events.add('add', function (e) {
+               let cluster = objectManager.clusters.getById(e.get('objectId')),
+                   objects = cluster.properties.geoObjects;
+               if (objects.find(el => el.isActive === false)) {
+                 objectManager.clusters.setClusterOptions(cluster.id, {
+                   preset: 'islands#redClusterIcons'
+                 });
+               } else {
+                 objectManager.clusters.setClusterOptions(cluster.id, {
+                   preset: 'islands#greenClusterIcons'
+                 });
+               }
+             });
+             
+ Готово!
 
 
 
