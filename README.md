@@ -60,30 +60,7 @@
        Было:  x.setHours(x.getHours() - data.length + i);
        Стало: x.setHours(x.getHours() - data.length + i + 1);
        
-Теперь ок. Перекрасим кластер, если там есть неисправная станция. Готового кода нет, значит допишем сами:
-
-    8. В "src/map.js" заменим:
-    
-           objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
-       
-       на:
-       
-           objectManager.clusters.events.add('add', function (e) {
-               let cluster = objectManager.clusters.getById(e.get('objectId')),
-                   objects = cluster.properties.geoObjects;
-               if (objects.find(el => el.isActive === false)) {
-                 objectManager.clusters.setClusterOptions(cluster.id, {
-                   preset: 'islands#redClusterIcons'
-                 });
-               } else {
-                 objectManager.clusters.setClusterOptions(cluster.id, {
-                   preset: 'islands#greenClusterIcons'
-                 });
-               }
-             });
-             
-
-
+Теперь ок.
 
 Завершающий шаг: причесать код на варнинги, неиспользуемый код, стилистические ошибки. Все они исправлены в коммите ["стилистические ошибки исправлены"](https://github.com/haritonasty/entrance-task-1-2/commit/12dd56fabed589e3c4ece665d989c0c5060f3757).
 
